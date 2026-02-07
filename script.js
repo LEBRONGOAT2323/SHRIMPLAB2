@@ -1,3 +1,7 @@
+// =======================
+// PHASE 4 – SHRIMP LAB2
+// =======================
+
 // -----------------------
 // 1️⃣ SOUNDS
 // -----------------------
@@ -7,10 +11,9 @@ const sounds = {
   error: new Audio("assets/sounds/error.mp3")
 };
 
-// Optional: slightly lower volume for hover to avoid spamming ears
 sounds.hover.volume = 0.3;
 sounds.unlock.volume = 0.5;
-sounds.error.volume = 0.7;
+sounds.error.volume = 0.6;
 
 // -----------------------
 // 2️⃣ PROJECT DATA
@@ -42,18 +45,29 @@ const projects = [
   }
 ];
 
+// 🌙 Night-only secret project
+const hour = new Date().getHours();
+const nightUnlocked = hour >= 22 || hour < 5;
+
+projects.push({
+  id: "afterHours",
+  name: "After Hours",
+  path: "projects/after-hours/",
+  thumb: "projects/after-hours/thumb.png"
+});
+
 const container = document.getElementById("projects");
 
 // -----------------------
-// 3️⃣ FIRST VISIT / UNLOCK LOGIC
+// 3️⃣ UNLOCK SYSTEM
 // -----------------------
 if (!localStorage.getItem("startDate")) {
   localStorage.setItem("startDate", new Date().toISOString());
 }
 
 const startDate = new Date(localStorage.getItem("startDate"));
-const today = new Date();
-const daysPassed = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+const now = new Date();
+const daysPassed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
 const unlockedCount = Math.min(daysPassed + 1, projects.length);
 
 const lastUnlocked = Number(localStorage.getItem("lastUnlocked")) || 0;
@@ -69,36 +83,58 @@ projects.forEach((p, i) => {
   const card = document.createElement("div");
   card.className = "card";
 
-  // --- UNLOCKED CARDS ---
+  // 🌙 Night project lock
+  if (p.id === "afterHours" && !nightUnlocked) {
+    card.classList.add("locked");
+    card.innerHTML = `
+      <img src="${p.thumb}" alt="Locked">
+      <span>${p.name} 🔒 — Only available at night 🌙</span>
+    `;
+
+    card.addEventListener("mouseenter", () => {
+      sounds.error.currentTime = 0;
+      sounds.error.play();
+    });
+
+    container.appendChild(card);
+    return;
+  }
+
+  // 🔓 UNLOCKED
   if (i < unlockedCount) {
     card.classList.add("unlocked");
-
-    // Build inner HTML with thumbnail
     card.innerHTML = `
-      <img src="${p.thumb}" alt="${p.name} thumbnail">
+      <img src="${p.thumb}" alt="${p.name}">
       <span>${p.name}</span>
     `;
 
     card.onclick = () => location.href = p.path;
 
-    // Hover sound
     card.addEventListener("mouseenter", () => {
       sounds.hover.currentTime = 0;
       sounds.hover.play();
+
+      // ✨ Particle effect
+      for (let j = 0; j < 6; j++) {
+        const dot = document.createElement("span");
+        dot.className = "particle";
+        dot.style.left = `${Math.random() * 100}%`;
+        dot.style.top = `${Math.random() * 100}%`;
+        card.appendChild(dot);
+        setTimeout(() => dot.remove(), 500);
+      }
     });
 
-    // Optional: small scale animation on click for polish
     card.addEventListener("mousedown", () => {
-      card.style.transform = "scale(0.97)";
+      card.style.transform = "scale(0.96)";
     });
+
     card.addEventListener("mouseup", () => {
-      card.style.transform = "scale(1.03)";
+      card.style.transform = "scale(1.05)";
     });
-    
-  
-    
+
   } else {
-    // --- LOCKED CARDS ---
+    // 🔒 LOCKED
     const messages = [
       "Not yet.",
       "Return tomorrow.",
@@ -106,21 +142,31 @@ projects.forEach((p, i) => {
       "Patience is part of the game.",
       "Still locked."
     ];
+
     const msg = messages[Math.floor(Math.random() * messages.length)];
 
+    card.classList.add("locked");
     card.innerHTML = `
       <img src="${p.thumb}" alt="Locked">
       <span>${p.name} 🔒 — ${msg}</span>
     `;
 
-    card.classList.add("locked");
+    card.addEventListener("mouseenter", () => {
+      sounds.error.currentTime = 0;
+      sounds.error.play();
+    });
+
+    card.addEventListener("click", () => {
+      card.style.transform = "rotate(1deg) scale(1.02)";
+      setTimeout(() => card.style.transform = "", 300);
+    });
   }
 
   container.appendChild(card);
 });
 
 // -----------------------
-// 5️⃣ DEV UNLOCK CHEAT
+// 5️⃣ DEV MODE
 // -----------------------
 document.addEventListener("keydown", e => {
   if (e.ctrlKey && e.key === "u") {
@@ -128,17 +174,3 @@ document.addEventListener("keydown", e => {
     location.reload();
   }
 });
-
-card.addEventListener("mouseenter", () => {
-  if (!card.classList.contains("locked")) {
-    for (let i=0;i<5;i++){
-      const dot = document.createElement("span");
-      dot.className="particle";
-      dot.style.left = `${Math.random()*100}%`;
-      dot.style.top = `${Math.random()*100}%`;
-      card.appendChild(dot);
-      setTimeout(()=>dot.remove(),500);
-    }
-  }
-});
-
