@@ -79,6 +79,54 @@ h1 {
   transform: scale(1.05);
 }
 
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  pointer-events: none;
+}
+
+.card.unlocked:hover {
+  box-shadow:
+    0 0 15px #00ffdd,
+    0 0 30px #00ffdd50;
+  transform: scale(1.05);
+}
+
+/* 🔒 Locked glitch */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.locked {
+  animation: flicker 2s infinite;
+  border-color: #440000;
+}
+
+/* ✨ Particles */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #00ffdd;
+  border-radius: 50%;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: float 0.5s linear;
+}
+
+@keyframes float {
+  to {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+}
 
 
 
