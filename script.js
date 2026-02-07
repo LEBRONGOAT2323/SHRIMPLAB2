@@ -94,7 +94,9 @@ projects.forEach((p, i) => {
     card.addEventListener("mouseup", () => {
       card.style.transform = "scale(1.03)";
     });
-
+    
+  
+    
   } else {
     // --- LOCKED CARDS ---
     const messages = [
@@ -126,3 +128,17 @@ document.addEventListener("keydown", e => {
     location.reload();
   }
 });
+
+card.addEventListener("mouseenter", () => {
+  if (!card.classList.contains("locked")) {
+    for (let i=0;i<5;i++){
+      const dot = document.createElement("span");
+      dot.className="particle";
+      dot.style.left = `${Math.random()*100}%`;
+      dot.style.top = `${Math.random()*100}%`;
+      card.appendChild(dot);
+      setTimeout(()=>dot.remove(),500);
+    }
+  }
+});
+
